@@ -1,3 +1,4 @@
+// Package serializers provides a GORM serializer for the `[]byte` type.
 package serializers
 
 import (
@@ -11,13 +12,39 @@ import (
 )
 
 type BytesSerializer struct{}
+
+// BytesInterface is an interface that requires implementing a method Bytes() which returns a byte slice.
+// It can be used to represent objects that can be converted to a byte slice representation.
 type BytesInterface interface{ Bytes() []byte }
+
+// SetBytesInterface is an interface that requires implementing a method SetBytes()
+// which sets the byte slice value. It can be used to represent objects that
+// can have their byte slice value modified.
 type SetBytesInterface interface{ SetBytes([]byte) }
 
 func init() {
 	schema.RegisterSerializer("bytes", BytesSerializer{})
 }
 
+// Scan deserializes a database value into a field of type `[]byte` or a type that implements
+// the `SetBytes([]byte)` interface.
+//
+// If the database value is nil, it will return nil.
+//
+// It first checks if the database value is a string. If not, it will return an error.
+//
+// If the database value is a string, it will attempt to decode it as a hex string using
+// `hexutil.Decode`. If the decoding fails, it will return an error.
+//
+// If the decoding is successful, it will create a new value of the field type and call
+// `SetBytes` on it with the decoded byte slice. If the field type does not implement the
+// `SetBytes([]byte)` interface, it will return an error.
+//
+// If the field type is a pointer, it will detect it and allocate memory to where the
+// allocated pointer should point to. If the field type is a double pointer, it will return
+// an error.
+//
+// Finally, it will set the deserialized value into the dst value using `ReflectValueOf`.
 func (BytesSerializer) Scan(ctx context.Context, field *schema.Field, dst reflect.Value, dbValue interface{}) error {
 	if dbValue == nil {
 		return nil

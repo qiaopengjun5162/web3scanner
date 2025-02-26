@@ -24,10 +24,14 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.0
+    rev: v0.5.1
     hooks:
       - id: go-fmt
         types: [go]
+        name: gofmt
+        entry: gofmt -w .
+        language: system
+        files: \.go$
       - id: go-imports
         types: [go]
 #      - id: no-go-testing

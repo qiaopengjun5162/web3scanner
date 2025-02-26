@@ -8,6 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
+// RLPHeader represents a types.Header for RLP encoding.
+// It is used to encode or decode the block header information in RLP format.
 type RLPHeader types.Header
 
 func (h *RLPHeader) EncodeRLP(w io.Writer) error {

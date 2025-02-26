@@ -1,3 +1,4 @@
+// Package flags provides the flags for the web3scanner
 package flags
 
 import "github.com/urfave/cli/v2"

@@ -1,3 +1,4 @@
+// Package opio provides a set of utilities for working with interrupts and cancellation in Go programs.
 package opio
 
 import (
@@ -74,7 +75,10 @@ func BlockerFromContext(ctx context.Context) BlockFn {
 	if v == nil {
 		return nil
 	}
-	return v.(BlockFn)
+	if blockFn, ok := v.(BlockFn); ok {
+		return blockFn
+	}
+	return nil // 类型断言失败时返回 nil
 }
 
 func CancelOnInterrupt(ctx context.Context) context.Context {

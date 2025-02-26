@@ -1,3 +1,4 @@
+// Package config provides configuration for the web3scanner.
 package config
 
 import (

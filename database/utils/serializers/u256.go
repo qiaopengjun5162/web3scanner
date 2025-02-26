@@ -55,6 +55,10 @@ func (U256Serializer) Value(ctx context.Context, field *schema.Field, dst reflec
 		return nil, fmt.Errorf("can only serialize a *big.Int: %T", field.FieldType)
 	}
 
-	numeric := pgtype.Numeric{Int: fieldValue.(*big.Int), Status: pgtype.Present}
-	return numeric.Value()
+	// 安全地进行类型断言
+	if bigInt, ok := fieldValue.(*big.Int); ok {
+		numeric := pgtype.Numeric{Int: bigInt, Status: pgtype.Present}
+		return numeric.Value()
+	}
+	return nil, fmt.Errorf("failed to assert type *big.Int")
 }

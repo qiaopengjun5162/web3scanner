@@ -1,3 +1,4 @@
+// Package database provides database-related functionality.
 package database
 
 import (
@@ -5,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"gorm.io/driver/postgres"
@@ -13,6 +15,7 @@ import (
 	"github.com/qiaopengjun5162/web3scanner/common/retry"
 	"github.com/qiaopengjun5162/web3scanner/config"
 
+	// Register custom serializers for GORM (e.g., U256Serializer, BytesSerializer).
 	_ "github.com/qiaopengjun5162/web3scanner/database/utils/serializers"
 )
 
@@ -68,6 +71,9 @@ func (db *DB) Transaction(fn func(db *DB) error) error {
 	})
 }
 
+// Close closes the database connection.
+//
+// It returns an error if closing the connection fails.
 func (db *DB) Close() error {
 	sql, err := db.gorm.DB()
 	if err != nil {
@@ -76,6 +82,10 @@ func (db *DB) Close() error {
 	return sql.Close()
 }
 
+// ExecuteSQLMigration applies all SQL migrations found in the given folder.
+//
+// It iterates over all files in the folder and executes their content as SQL.
+// If any error occurs, it is returned.
 func (db *DB) ExecuteSQLMigration(migrationsFolder string) error {
 	err := filepath.Walk(migrationsFolder, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -84,6 +94,13 @@ func (db *DB) ExecuteSQLMigration(migrationsFolder string) error {
 		if info.IsDir() {
 			return nil
 		}
+
+		// Ensure the file is within the migrations folder to prevent path traversal attacks
+		relativePath, err := filepath.Rel(migrationsFolder, path)
+		if err != nil || strings.Contains(relativePath, "..") {
+			return errors.New("invalid migration file path")
+		}
+		// Read the file content
 		fileContent, readErr := os.ReadFile(path)
 		if readErr != nil {
 			return errors.Wrap(readErr, fmt.Sprintf("Error reading SQL file: %s", path))

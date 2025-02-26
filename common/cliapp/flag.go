@@ -1,3 +1,4 @@
+// Package cliapp provides utilities for working with the CLI application.
 package cliapp
 
 import (
@@ -11,6 +12,11 @@ type CloneableGeneric interface {
 	Clone() any
 }
 
+// ProtectFlags creates a deep copy of the given flags slice.
+//
+// It panics if an error occurs while cloning a flag.
+//
+// The returned slice contains the same flags in the same order as the input slice.
 func ProtectFlags(flags []cli.Flag) []cli.Flag {
 	out := make([]cli.Flag, 0, len(flags))
 	for _, f := range flags {
